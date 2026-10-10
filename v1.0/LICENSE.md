@@ -442,11 +442,11 @@ EXCEPT FOR ARTICLES 3.8, 3.9, 6.4, AND 9.4, AND EXCEPT FOR ANY EXPRESS WRITTEN C
 
 15.3 **Governing law; venue.** Romania; courts of Bucharest, unless a Separate Commercial License or client engagement validly provides otherwise for that engagement.
 
-15.4 **Language.** English prevails; translations are courtesy. Schedule D is informative only.
+15.4 **Language.** English is the sole language of this Licence. Any translation or summary in another language is courtesy only and has no legal effect.
 
 15.5 **Versions.** Later DMSAL versions apply only to future distributions under that later text. A given copy remains under the version that accompanied it unless agreed otherwise in writing.
 
-15.6 **Hierarchy.** Articles prevail over Schedules A and D. Schedules B and C are operative notice templates when used as such.
+15.6 **Hierarchy.** Articles prevail over Schedule A. Schedules B and C are operative notice templates when used as such.
 
 15.7 **Inter-company deed.** A separate signed acknowledgement between DSE and MS mirroring Article 3 is recommended for evidentiary comfort. Absence of that deed does not negate Article 3 as between Full Owners for Software published under this Licence. Confirmation-letter timing and content are governed solely by Article 3.8(f).
 
@@ -499,19 +499,3 @@ Licensing Party owes Contracted Related Services only.
 Public Source Code: inspection only. Use: Articles 5, 6, or 9.
 See LICENSE
 ```
-
----
-
-## Schedule D — Rezumat (RO) — informativ
-
-- **Digital Mind** = branding comun.  
-- **Copyright:** fiecare Full Owner pe contribuțiile sale; **autoritate de comercializare independentă** — oricare licențiază singur față de client.  
-- Model: proprietate pe Contributions + licențe reciproce de comercializare.  
-- **DMSAL** guvernează distribuțiile sub acest text; contractele vechi fără referință rămân pe termenii lor până la adoptare expresă sau republicare.  
-- **Contributors:** Full Owner sau mandat scris expres.  
-- **Qualifying Delivery:** Contributor + Delivery Record (versiuni listate + SBOM minim + DMSAL/NOTICE) + nu Software-Primary.  
-- **Pass-through:** sublicență de Use pe versiunile listate; fără Delivery Record conform → fără drepturi Art. 6.  
-- SaaS pentru end-users pe Client Software-ul livrat: Art. 5–6. Predare codebase/instalatori către alt vendor: Art. 9 (5.10).  
-- **Indemnity IP:** cap separat — 2× fees (12 luni); orice alt plafon sau floor minim doar în Separate Commercial License sau engagement / master semnat care incorporă această Licență.  
-- **Confirmation letter** (Art. 3.8(f)): 15 zile lucrătoare; efort co-confirmare / extras deed.  
-- Prevalează EN, Articolele 1–15.

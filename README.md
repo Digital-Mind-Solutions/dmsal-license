@@ -52,3 +52,15 @@ Art. 14.3 allows a clear pointer instead of a full local copy; a local `LICENSE.
 
 Full Owners under DMSAL: **DIGITAL SOLUTIONS EXPERT S.R.L.** and **MIND STUDIO S.R.L.**  
 “Digital Mind” is branding only.
+
+## Rezumat (RO) — informativ
+
+Acest rezumat este doar un ajutor de citire: **nu** face parte din licență. Nu creează, nu modifică și nu înlocuiește drepturi. Dacă rezumatul și [`v1.0/LICENSE.md`](v1.0/LICENSE.md) diferă, **contează doar textul englez** din `LICENSE.md` (Art. 15.4).
+
+- **Digital Mind** = branding comun (nu persoană juridică).
+- **Copyright:** fiecare Full Owner pe contribuțiile sale; oricare poate comercializa singur (**Independent Commercialization Authority**).
+- **Repo public:** inspection only; **Use** doar prin Art. 5–6 (Qualifying Delivery) sau Art. 9.
+- **Qualifying Delivery:** Contributor + Delivery Record (versiuni listate + SBOM minim + DMSAL/NOTICE) + nu Software-Primary → sublicență de Use **doar** pe versiunile livrate, **în** Client Software-ul livrat (fără extragere / refolosire în alte produse).
+- **Art. 9** pentru OEM, Software-Primary, redistribuire standalone / predare codebase către alt vendor.
+- **Indemnity IP / răspundere:** default pe fees (IP = 2× fees pe 12 luni); orice floor sau alt plafon doar în SCL sau engagement/master semnat.
+- Prevalează engleza (Art. 15.4).
