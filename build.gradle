@@ -1,85 +1,22 @@
 plugins {
-    id 'java-library'
+    id 'base'
 }
 
-group = 'org.digitalmind.license'
-// Current / default module version for includeBuild consumers (org.digitalmind.license:dmsal-license:1.0).
-// Must match an existing v<version>/ folder.
-version = '1.0'
+// Aggregator: one Gradle plugin jar per v*/LICENSE.md (built inside :dmsal-gradle-plugin).
 
-// No Java sources — JARs carry only the canonical DMSAL text.
-sourceSets.main {
-    java.srcDirs = []
-    resources.srcDirs = []
-}
-
-def licenseVersionDirs = (file('.').listFiles() ?: [] as File[]).findAll { File d ->
-    d.directory && (d.name ==~ /^v\d+\.\d+(\.\d+)?$/) && new File(d, 'LICENSE.md').isFile()
-}.sort { it.name }
-
-if (licenseVersionDirs.isEmpty()) {
-    throw new GradleException("No vX.Y/LICENSE.md directories under ${projectDir}")
-}
-
-def primaryFolder = "v${version}"
-if (!licenseVersionDirs.any { it.name == primaryFolder }) {
-    throw new GradleException(
-            "project.version=${version} requires folder ${primaryFolder}/ with LICENSE.md " +
-            "(found: ${licenseVersionDirs*.name})"
-    )
-}
-
-// Default java-library jar is replaced by per-version licence jars.
-tasks.named('jar', Jar).configure {
-    enabled = false
-}
-
-def licenseJarTasks = licenseVersionDirs.collect { File dir ->
-    def verNum = dir.name.substring(1)
-    def taskName = "licenseJar_${verNum.replace('.', '_')}"
-    tasks.register(taskName, Jar) {
-        group = 'build'
-        description = "Package DMSAL ${dir.name} as dmsal-license-${verNum}.jar"
-        archiveBaseName = 'dmsal-license'
-        archiveVersion = verNum
-        destinationDirectory = layout.buildDirectory.dir('libs')
-        mustRunAfter('clean')
-        from(new File(dir, 'LICENSE.md')) {
-            into 'META-INF'
-        }
-        doFirst {
-            def license = new File(dir, 'LICENSE.md')
-            if (!license.exists() || license.length() == 0L) {
-                throw new GradleException("Missing or empty ${dir.name}/LICENSE.md")
-            }
-        }
-    }
-}
-
-tasks.register('licenseJars') {
-    group = 'build'
-    description = 'Build dmsal-license-*.jar for every v*/LICENSE.md version'
-    dependsOn licenseJarTasks
-    mustRunAfter('clean')
-}
-
-tasks.named('assemble') {
-    dependsOn tasks.named('licenseJars')
-    mustRunAfter('clean')
-}
-
-tasks.named('check') {
-    mustRunAfter('clean')
+tasks.named('clean') {
+    dependsOn ':dmsal-gradle-plugin:clean'
 }
 
 tasks.named('build') {
     dependsOn('clean')
-    dependsOn tasks.named('licenseJars')
+    dependsOn ':dmsal-gradle-plugin:pluginJars'
 }
 
-// Composite / Maven consumers of :1.0 get the primary version jar.
-def primaryJarTask = tasks.named("licenseJar_${version.toString().replace('.', '_')}")
-configurations.apiElements.outgoing.artifacts.clear()
-configurations.runtimeElements.outgoing.artifacts.clear()
-configurations.apiElements.outgoing.artifact(primaryJarTask)
-configurations.runtimeElements.outgoing.artifact(primaryJarTask)
+// Single publishing entry for the whole repo (IDEA + CLI).
+tasks.register('publishToMavenLocal') {
+    group = 'publishing'
+    description = 'Clean + build plugin jars, then publish ALL versions (+ markers) to Maven Local'
+    dependsOn ':dmsal-gradle-plugin:pluginJars'
+    dependsOn ':dmsal-gradle-plugin:publishAllPluginsToMavenLocal'
+}

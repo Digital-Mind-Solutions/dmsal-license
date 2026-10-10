@@ -1,0 +1,138 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'maven-publish'
+}
+
+group = 'org.digitalmind.license'
+
+def licenseVersionDirs = (rootProject.file('.').listFiles() ?: [] as File[]).findAll { File d ->
+    d.directory && (d.name ==~ /^v\d+\.\d+(\.\d+)?$/) && new File(d, 'LICENSE.md').isFile()
+}.sort { it.name }
+
+if (licenseVersionDirs.isEmpty()) {
+    throw new GradleException("No vX.Y/LICENSE.md under ${rootProject.projectDir}")
+}
+
+def licenseVersions = licenseVersionDirs.collect { it.name.substring(1) }
+
+// Gradle requires a project.version — not a product "current line". Prefer mavenLocal + explicit plugin version.
+version = licenseVersions.first()
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+gradlePlugin {
+    automatedPublishing = false
+    plugins {
+        dmsalLicense {
+            id = 'org.digitalmind.dmsal-license'
+            implementationClass = 'org.digitalmind.license.gradle.DmsalLicensePlugin'
+            displayName = 'DMSAL licence packager'
+            description = 'Stages the DMSAL text embedded in this plugin jar into the consumer jar as META-INF/LICENSE.md'
+        }
+    }
+}
+
+// Default jar unused — every licence folder gets its own plugin jar (same pattern, no special case).
+tasks.named('jar', Jar).configure {
+    enabled = false
+}
+
+/**
+ * Dynamic: one plugin jar per vX.Y/LICENSE.md. All folders treated equally.
+ * archiveVersion = X.Y from folder name (v1.0 → 1.0).
+ */
+def pluginJarByVersion = [:]
+licenseVersionDirs.each { File dir ->
+    def verNum = dir.name.substring(1)
+    def taskName = "dmsalPluginJar_${verNum.replace('.', '_')}"
+    def jarTask = tasks.register(taskName, Jar) {
+        group = 'build'
+        description = "Plugin jar embedding ${dir.name}/LICENSE.md (Maven version ${verNum})"
+        dependsOn tasks.named('classes'), tasks.named('pluginDescriptors')
+        archiveBaseName = 'dmsal-gradle-plugin'
+        archiveVersion = verNum
+        destinationDirectory = layout.buildDirectory.dir('libs')
+        from(sourceSets.main.output)
+        from(tasks.named('pluginDescriptors'))
+        from(new File(dir, 'LICENSE.md')) {
+            into 'META-INF/dmsal'
+            rename { 'LICENSE.md' }
+        }
+        doFirst {
+            def license = new File(dir, 'LICENSE.md')
+            if (!license.exists() || license.length() == 0L) {
+                throw new GradleException("Missing or empty ${dir.name}/LICENSE.md")
+            }
+            logger.lifecycle("Building plugin jar ${archiveFileName.get()} with ${dir.name}/LICENSE.md")
+        }
+    }
+    pluginJarByVersion[verNum] = jarTask
+}
+
+tasks.register('pluginJars') {
+    group = 'build'
+    description = 'Clean build/, then build dmsal-gradle-plugin-X.Y.jar for every vX.Y/LICENSE.md'
+    dependsOn('clean')
+    dependsOn pluginJarByVersion.values()
+}
+
+pluginJarByVersion.values().each { jarProvider ->
+    jarProvider.configure { mustRunAfter('clean') }
+}
+tasks.named('classes') { mustRunAfter('clean') }
+tasks.named('pluginDescriptors') { mustRunAfter('clean') }
+
+tasks.named('assemble') {
+    dependsOn tasks.named('pluginJars')
+}
+
+tasks.named('build') {
+    dependsOn('clean')
+    dependsOn tasks.named('pluginJars')
+}
+
+publishing {
+    licenseVersionDirs.each { File dir ->
+        def verNum = dir.name.substring(1)
+        def verKey = verNum.replace('.', '_')
+        def jarTask = pluginJarByVersion[verNum]
+
+        publications.create("dmsalPlugin_${verKey}", MavenPublication) {
+            groupId = project.group
+            artifactId = 'dmsal-gradle-plugin'
+            version = verNum
+            artifact jarTask
+        }
+
+        publications.create("dmsalPluginMarker_${verKey}", MavenPublication) {
+            groupId = 'org.digitalmind.dmsal-license'
+            artifactId = 'org.digitalmind.dmsal-license.gradle.plugin'
+            version = verNum
+            pom {
+                withXml {
+                    def deps = asNode().appendNode('dependencies')
+                    def dep = deps.appendNode('dependency')
+                    dep.appendNode('groupId', project.group)
+                    dep.appendNode('artifactId', 'dmsal-gradle-plugin')
+                    dep.appendNode('version', verNum)
+                }
+            }
+        }
+    }
+}
+
+tasks.register('publishAllPluginsToMavenLocal') {
+    group = null
+    description = 'Publish every discovered licence-line plugin (+ markers) to Maven Local'
+    dependsOn tasks.withType(PublishToMavenLocal)
+}
+
+afterEvaluate {
+    tasks.matching { Task t ->
+        def n = t.name
+        n.startsWith('publish') || n.startsWith('generatePom') || n.startsWith('generateMetadata')
+    }.configureEach { group = null }
+}
