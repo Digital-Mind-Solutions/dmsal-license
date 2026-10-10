@@ -3,6 +3,7 @@ package org.digitalmind.license.gradle;
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.DuplicatesStrategy;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.TaskProvider;
@@ -51,16 +52,14 @@ public class DmsalLicensePlugin implements Plugin<Project> {
             return;
         }
 
+        // java-library applies java — register once only (avoids duplicate META-INF/LICENSE.md).
         project.getPlugins().withId("java", plugin -> wireJar(project, fetch, staged));
-        project.getPlugins().withId("java-library", plugin -> wireJar(project, fetch, staged));
     }
 
     private void wireJar(Project project, TaskProvider<?> fetch, Provider<RegularFile> staged) {
-        project.getTasks().withType(Jar.class).configureEach(jar -> {
-            if (!"jar".equals(jar.getName())) {
-                return;
-            }
+        project.getTasks().named("jar", Jar.class, jar -> {
             jar.dependsOn(fetch);
+            jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE);
             jar.metaInf(metaInf -> {
                 metaInf.from(staged);
                 metaInf.rename(name -> "LICENSE.md");
