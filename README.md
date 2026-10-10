@@ -16,28 +16,38 @@ Public Source Code under DMSAL is for **inspection only**. **Use** requires Arti
 
 ```text
 dmsal-license/
-  README.md           # this index
-  NOTICE.template     # Schedule B — fill Artifact: <name> per product
-  v1.0/
-    LICENSE.md        # DMSAL v1.0 (immutable after release)
-  v1.1/               # add only when a new DMSAL version is published
-    LICENSE.md
+  settings.gradle / build.gradle   # Gradle library org.digitalmind.license:dmsal-license:1.0
+  README.md
+  NOTICE.template
+  v1.0/LICENSE.md                  # DMSAL v1.0 (immutable after release)
 ```
 
 - **One folder per DMSAL version** on `main` (not version branches).
 - After a version is published, **do not edit** that folder; publish the next version as a new folder.
 - Prefer Git **tags** (`v1.0`, `v1.1`, …) on the commit that freezes that text, so consumers can pin a URL.
 
-## How other repositories should cite this
+## How other repositories should consume this
 
-1. **Copy** `v1.0/LICENSE.md` into the product repo as `LICENSE.md` (recommended for clones, JARs, Qualifying Delivery).
-2. In the product README, link the canonical text, e.g.  
-   `https://github.com/Digital-Mind-Solutions/dmsal-license/blob/v1.0/v1.0/LICENSE.md`  
-   (tag preferred over `main`).
-3. Optional product `NOTICE`: copy [`NOTICE.template`](NOTICE.template) and set `Artifact:` to the module name (e.g. `templating-core`).
-4. Schedule C copyright header in source: end with `See LICENSE` (file on disk remains `LICENSE.md`).
+### Gradle composite (recommended for Digital Mind building blocks)
 
-Art. 14.3 allows a clear pointer instead of a full local copy; a local `LICENSE.md` is still preferred for offline and delivery packages.
+1. Clone this repo as a **sibling** of the product repo (e.g. `…/JAVA/dmsal-license` next to `…/JAVA/buildingblocks-i18n`).
+2. In the product `settings.gradle`:
+   ```gradle
+   includeBuild('../dmsal-license')
+   ```
+3. Depend on `org.digitalmind.license:dmsal-license:1.0` (custom configuration), stage `META-INF/LICENSE.md` from that jar into the product jar.  
+   Without the sibling clone, Gradle **fails at configuration** — that is intentional.
+
+Coordinates: **`org.digitalmind.license:dmsal-license:1.0`** — JAR contains only `META-INF/LICENSE.md` (from `v1.0/LICENSE.md`).
+
+### Docs / pointer
+
+- Product README: link  
+  `https://github.com/Digital-Mind-Solutions/dmsal-license/blob/v1.0/v1.0/LICENSE.md`
+- Optional `NOTICE`: copy [`NOTICE.template`](NOTICE.template), set `Artifact:`.
+- Schedule C header: `See LICENSE`.
+
+Art. 14.3 allows a clear pointer; composite build packs the text into published JARs without copying LICENSE into each product git tree.
 
 ## Versioning policy
 

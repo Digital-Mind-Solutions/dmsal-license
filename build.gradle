@@ -1,0 +1,25 @@
+plugins {
+    id 'java-library'
+}
+
+group = 'org.digitalmind.license'
+version = '1.0'
+
+// No Java sources — JAR carries only the canonical DMSAL text for consumers (composite / Maven).
+sourceSets.main {
+    java.srcDirs = []
+    resources.srcDirs = []
+}
+
+jar {
+    archiveBaseName = 'dmsal-license'
+    from('v1.0/LICENSE.md') {
+        into 'META-INF'
+    }
+    doFirst {
+        def license = file('v1.0/LICENSE.md')
+        if (!license.exists() || license.length() == 0L) {
+            throw new GradleException("Missing v1.0/LICENSE.md — cannot build dmsal-license jar")
+        }
+    }
+}
