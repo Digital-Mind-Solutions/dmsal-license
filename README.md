@@ -40,6 +40,16 @@ dmsal-license/
 
 Coordinates: **`org.digitalmind.license:dmsal-license:1.0`** — JAR contains only `META-INF/LICENSE.md` (from `v1.0/LICENSE.md`).
 
+### Build all licence jars
+
+```bash
+./gradlew build         # clean, then all licence jars
+./gradlew licenseJars   # jars only (no clean)
+```
+
+Discovers every `vX.Y/LICENSE.md` and writes `build/libs/dmsal-license-X.Y.jar`.  
+`project.version` in `build.gradle` (currently **1.0**) is the default artefact for `includeBuild` consumers; bump it when the “current” DMSAL line changes (and add `v1.1/` etc. as new folders).
+
 ### Docs / pointer
 
 - Product README: link  
